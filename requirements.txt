@@ -1,0 +1,25 @@
+# TorlakTag — Python dependencies
+# Tested on Python 3.10 / 3.11, CUDA 11.8 / 12.1
+# Install: pip install -r requirements.txt
+
+# ── Core deep learning ─────────────────────────────────────────────────────────
+torch>=2.0.0
+transformers>=4.40.0
+datasets>=2.18.0
+sentencepiece>=0.1.99        # required for ByT5 / mT5 tokenizers
+accelerate>=0.27.0
+
+# ── Evaluation ─────────────────────────────────────────────────────────────────
+seqeval>=1.2.2               # sequence-labeling metrics (used in finetune notebooks)
+
+# ── XML / corpus processing ────────────────────────────────────────────────────
+lxml>=4.9.0                  # EXB and TEI XML parsing
+conllu>=4.4.1                # CoNLL-U parsing (optional helper)
+
+# ── LLM API (sentence segmentation, evaluation, augmentation) ─────────────────
+google-generativeai>=0.5.0   # Gemini API — sentence_segmenter.py, evaluate_with_gemini.py
+
+# ── General utilities ──────────────────────────────────────────────────────────
+numpy>=1.24.0
+tqdm>=4.66.0
+pandas>=2.0.0
