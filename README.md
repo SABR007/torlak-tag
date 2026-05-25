@@ -174,15 +174,11 @@ python conllu_to_enriched_exb.py \
 
 ---
 
-## Training and fine-tuning
+## Training
 
 | Notebook | Purpose |
 |---|---|
 | `TorlakTag_Multirun_3models_EXB-2.ipynb` | Train XLM-RoBERTa models (lemma, UPOS+XPOS+features) |
-| `finetune_lemma.ipynb` | Standalone lemma model fine-tuning |
-| `finetune_xpos_2.ipynb` | Standalone UPOS + XPOS + features fine-tuning |
-| `augment_xpos.ipynb` | Gemini-assisted training-data augmentation (Colab) |
-| `augment_local.py` | Same augmentation, runs locally |
 | `TorlakTag_FeatDifficulty_XLMRoberta2.ipynb` | Per-feature difficulty analysis |
 
 ---
