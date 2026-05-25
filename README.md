@@ -2,7 +2,7 @@
 
 **Automatic morphosyntactic annotation pipeline for Torlak and Lužnica dialect spoken corpora.**
 
-TorlakTag converts raw EXB (EXMARaLDA) transcription files into fully enriched, TEI-XML-formatted spoken-corpus documents. It runs three fine-tuned XLM-RoBERTa models (lemmatisation, UPOS+XPOS+features, definiteness) over dialectal South Slavic speech data, then layers sentence segmentation, speaker metadata, and ethnographic topic tags on top.
+TorlakTag converts raw EXB (EXMARaLDA) transcription files into fully enriched, TEI-XML-formatted spoken-corpus documents. It runs fine-tuned XLM-RoBERTa models (lemmatisation, UPOS + XPOS + features) over dialectal South Slavic speech data, then layers sentence segmentation, speaker metadata, and ethnographic topic tags on top.
 
 ---
 
@@ -17,36 +17,31 @@ EXB transcripts
       ▼  (2) LLM sentence segmentation
   segmented CoNLL-U  (sentence_segmented_conllu/)
       │
-      ▼  (3) CoNLL-U enrichment (speaker metadata, timing, lemma re-alignment)
-  enriched CoNLL-U  (enriched_conllu / final_conllu_relemmad/)
+      ▼  (3) CoNLL-U enrichment  (speaker metadata, timing, token provenance)
+  enriched CoNLL-U  (final_conllu_relemmad/)
       │
       ▼  (4) Topic tagging
   topic-tagged CoNLL-U  (topic_tagged_relemmad/)
       │
       ├──▶  (5a) TEI XML  (tei_output_relemmad/)
-      └──▶  (5b) Enriched EXB  (EXB trials/)
+      └──▶  (5b) Enriched EXB
 ```
 
 ---
 
 ## Step 1 — Model inference: EXB → CoNLL-U
 
-**Notebook:** `TorlakTag_Multirun_3models_EXB-2.ipynb`
+**Training notebook:** `TorlakTag_Multirun_3models_EXB-2.ipynb`  
+**Inference notebook:** `TorlakTag_Inference_EXB2CoNLLU.ipynb`
 
-Runs three fine-tuned XLM-RoBERTa models sequentially over each EXB file:
+Two fine-tuned XLM-RoBERTa models are run sequentially over each EXB file:
 
-| Model | Task | Output column |
+| Model | Task | Output column(s) |
 |---|---|---|
 | Lemma model | Lemmatisation | `LEMMA` |
 | XPOS model | MulText-East XPOS + UPOS + morphological features | `UPOS`, `XPOS`, `FEATS` |
-| Definite model | Definiteness feature (Torlak-specific) | patched into `FEATS` |
 
-The notebook reads `.exb` files from `TOR_C_EXB_transcripts/`, calls each model in turn, and writes one `.conllu` per recording to `final_conllu/`.
-
-**Alternative notebooks:**
-- `TorlakTag_Inference_EXB2CoNLLU.ipynb` — single-model inference variant
-- `TorlakTag_LemmaOnly.ipynb` — runs only the lemma model
-- `TorlakTag_Definite_Fixed.ipynb` — re-runs the definiteness model on existing CoNLL-U files
+The training notebook (`TorlakTag_Multirun_3models_EXB-2.ipynb`) compares multiple transformer backbones and saves the best checkpoint. The inference notebook (`TorlakTag_Inference_EXB2CoNLLU.ipynb`) then runs batch inference over all `.exb` files and writes one `.conllu` per recording to `final_conllu/`. It is resumable — already-completed files are skipped automatically.
 
 ### Model weights
 
@@ -56,7 +51,6 @@ The fine-tuned model weights are hosted on Google Drive. Download and place them
 |---|---|
 | Lemma model | *(link to be added)* |
 | UPOS + XPOS + Features model | *(link to be added)* |
-| Definiteness model | *(link to be added)* |
 
 ---
 
@@ -78,16 +72,14 @@ python sentence_segmenter.py final_conllu/TOR_C_0001.conllu \
 python run_segmenter_batch.py --workers 5 --api-key YOUR_GEMINI_KEY
 ```
 
-**Notebook:** `sentence_.ipynb` — exploratory version of the segmenter used during development.
-
 ---
 
 ## Step 3 — CoNLL-U enrichment
 
-**Scripts:** `enrich_pred_conllu.py`, `enrich_conllu.py`, `enrich_conllu_corrected.py`  
+**Script:** `enrich_pred_conllu.py`  
 **Batch runner:** `run_enrich_batch.py`
 
-Merges sentence-segmented predictions with the original EXB timing and speaker metadata, re-aligns lemmas from the corrected tokenisation, and writes `.enriched.conllu` to `final_conllu_relemmad/`.
+Aligns sentence-segmented predictions back against their source utterances and adds speaker metadata, timing information, and per-token provenance. Writes `.enriched.conllu` to `final_conllu_relemmad/`.
 
 ```bash
 # Single file
@@ -104,17 +96,18 @@ python run_enrich_batch.py --workers 8
 Each sentence in the output carries:
 
 ```
-# sent_id         = TOR_C_0001-r000001
-# text            = …
-# speaker         = TIM_SPK_0001
-# speaker_abbr    = OS_1
-# speaker_age     = 72
-# speaker_gender  = f
+# sent_id          = TOR_C_0001-r000001
+# text             = …
+# speaker          = TIM_SPK_0001
+# speaker_abbr     = OS_1
+# speaker_age      = 72
+# speaker_gender   = f
 # speaker_education = no education
-# start_time      = 12.34
-# end_time        = 14.56
+# start_time       = 12.34
+# end_time         = 14.56
 # timing_precision = exact
-# EXB_sources     = TOR_C_0001-s0003|TOR_C_0001-s0004
+# EXB_sources      = TOR_C_0001-s0003|TOR_C_0001-s0004
+# EXB_token_map    = 1:TOR_C_0001-s0003-w1 …
 ```
 
 ---
@@ -185,8 +178,9 @@ python conllu_to_enriched_exb.py \
 
 | Notebook | Purpose |
 |---|---|
-| `finetune_lemma.ipynb` | Fine-tune XLM-RoBERTa for Torlak lemmatisation |
-| `finetune_xpos_2.ipynb` | Fine-tune XLM-RoBERTa for UPOS + XPOS + features |
+| `TorlakTag_Multirun_3models_EXB-2.ipynb` | Train XLM-RoBERTa models (lemma, UPOS+XPOS+features) |
+| `finetune_lemma.ipynb` | Standalone lemma model fine-tuning |
+| `finetune_xpos_2.ipynb` | Standalone UPOS + XPOS + features fine-tuning |
 | `augment_xpos.ipynb` | Gemini-assisted training-data augmentation (Colab) |
 | `augment_local.py` | Same augmentation, runs locally |
 | `TorlakTag_FeatDifficulty_XLMRoberta2.ipynb` | Per-feature difficulty analysis |
@@ -211,28 +205,23 @@ Results are written to `evaluate_with_gemini_results.tsv` and `evaluate_with_gem
 
 ```
 torlak-tag/
-├── sentence_segmenter.py          # Step 2: sentence boundary detection (Gemini)
-├── run_segmenter_batch.py         # Step 2: batch runner
-├── enrich_pred_conllu.py          # Step 3: CoNLL-U enrichment (main)
-├── enrich_conllu.py               # Step 3: enrichment variant (gold tokenisation)
-├── enrich_conllu_corrected.py     # Step 3: enrichment with corrected tokenisation
-├── run_enrich_batch.py            # Step 3: batch runner
-├── add_topic_metadata.py          # Step 4: topic tag injection
-├── conllu_to_tei.py               # Step 5a: TEI XML generation
-├── conllu_to_enriched_exb.py      # Step 5b: enriched EXB output
-├── augment_local.py               # Training: Gemini data augmentation (local)
-├── evaluate_with_gemini.py        # Evaluation: LLM-as-judge scorer
-├── run_combined_eval.py           # Evaluation: combined multi-file report
+├── sentence_segmenter.py               # Step 2: sentence boundary detection (Gemini)
+├── run_segmenter_batch.py              # Step 2: batch runner
+├── enrich_pred_conllu.py               # Step 3: CoNLL-U enrichment
+├── run_enrich_batch.py                 # Step 3: batch runner
+├── add_topic_metadata.py               # Step 4: topic tag injection
+├── conllu_to_tei.py                    # Step 5a: TEI XML generation
+├── conllu_to_enriched_exb.py          # Step 5b: enriched EXB output
+├── augment_local.py                    # Training: Gemini data augmentation (local)
+├── evaluate_with_gemini.py             # Evaluation: LLM-as-judge scorer
+├── run_combined_eval.py                # Evaluation: combined multi-file report
 │
-├── TorlakTag_Multirun_3models_EXB-2.ipynb    # Step 1: full inference pipeline
-├── TorlakTag_Inference_EXB2CoNLLU.ipynb      # Step 1: single-model inference
-├── TorlakTag_LemmaOnly.ipynb                  # Step 1: lemma-only inference
-├── TorlakTag_Definite_Fixed.ipynb             # Step 1: definiteness re-tagging
+├── TorlakTag_Multirun_3models_EXB-2.ipynb    # Training: multi-model comparison
+├── TorlakTag_Inference_EXB2CoNLLU.ipynb      # Step 1: batch inference (EXB → CoNLL-U)
 ├── TorlakTag_FeatDifficulty_XLMRoberta2.ipynb # Analysis: per-feature difficulty
 ├── finetune_lemma.ipynb                        # Training: lemma model
 ├── finetune_xpos_2.ipynb                       # Training: XPOS model
-├── augment_xpos.ipynb                          # Training: data augmentation (Colab)
-└── sentence_.ipynb                             # Dev: sentence segmenter exploration
+└── augment_xpos.ipynb                          # Training: data augmentation (Colab)
 ```
 
 ---
