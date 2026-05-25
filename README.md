@@ -23,25 +23,25 @@ EXB transcripts
       ▼  (4) Topic tagging
   topic-tagged CoNLL-U  (topic_tagged_relemmad/)
       │
-      ├──▶  (5a) TEI XML  (tei_output_relemmad/)
-      └──▶  (5b) Enriched EXB
+      ├──▶  (5) TEI XML  (tei_output_relemmad/)
 ```
 
 ---
 
 ## Step 1 — Model inference: EXB → CoNLL-U
 
-**Training notebook:** `TorlakTag_Multirun_3models_EXB-2.ipynb`  
-**Inference notebook:** `TorlakTag_Inference_EXB2CoNLLU.ipynb`
+**Training notebook:** `TorlakTag_Multirun_3models_EXB-2.ipynb` , 
+**Inference notebook:** `TorlakTag_Inference_EXB2CoNLLU.ipynb`,
+**Relemmatization notebook:** `TorlakTag_LemmaOnly.ipynb`
 
-Two fine-tuned XLM-RoBERTa models are run sequentially over each EXB file:
+Two fine-tuned  models are run sequentially over each EXB file:
 
 | Model | Task | Output column(s) |
 |---|---|---|
 | Lemma model | Lemmatisation | `LEMMA` |
 | XPOS model | MulText-East XPOS + UPOS + morphological features | `UPOS`, `XPOS`, `FEATS` |
 
-The training notebook (`TorlakTag_Multirun_3models_EXB-2.ipynb`) compares multiple transformer backbones and saves the best checkpoint. The inference notebook (`TorlakTag_Inference_EXB2CoNLLU.ipynb`) then runs batch inference over all `.exb` files and writes one `.conllu` per recording to `final_conllu/`. It is resumable — already-completed files are skipped automatically.
+The training notebook (`TorlakTag_Multirun_3models_EXB-2.ipynb`) compares multiple transformer backbones and saves the best checkpoint. The inference notebook (`TorlakTag_Inference_EXB2CoNLLU.ipynb`) then runs batch inference over all `.exb` files and writes one `.conllu` per recording to `final_conllu/`. It is resumable — already-completed files are skipped automatically. And finally (`TorlakTag_LemmaOnly.ipynb`) trains a model just for lemma, and adds them to the conllu files. 
 
 ### Model weights
 
@@ -238,14 +238,13 @@ pip install transformers torch datasets conllu google-generativeai lxml
 
 ## Data
 
-The corpus covers **TOR_C** (Torlak dialect, 96 recordings) and **LUZ_C** (Lužnica dialect, 19 recordings). Raw EXB transcriptions and audio files are not included in this repository. Contact the corpus team for access.
-
-Topic metadata is drawn from `Torlak_tales-main/`, a curated set of ethnographic topic-cluster and fine-custom markdown files that map time ranges in each recording to semantic topics (in both English slugs and Serbian labels).
+The corpus covers 115 transcripts of Torlak dialect. Raw EXB transcriptions and audio files are not included in this repository. Contact the corpus team for access.
 
 ---
 
-## Citation
+## Questions
 
-If you use this pipeline or the corpus, please cite:
+If you have any questions on pipeline or the corpus, please reach out:
 
-> Vuković, T. (2025). *TorlakTag: Automatic morphosyntactic annotation of Torlak dialect spoken corpora*. Department of Slavonic Languages and Literatures, University of Zurich.
+> Dr Teodora Vuković, teodora.vukovic2@uzh.ch
+> Abu Bakr Rahman Shaik, abubakrrahman.shaik@uzh.ch
