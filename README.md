@@ -1,6 +1,6 @@
 # TorlakTag
 
-Automatic morphosyntactic annotation pipeline for the **Spoken Torlak Dialect Corpus** (TOR\_C, 96 recordings) and the **Spoken Lužnica Dialect Corpus** (LUZ\_C, 19 recordings). TorlakTag converts raw EXMARaLDA (EXB) transcription files into fully enriched CoNLL-U and TEI XML documents, with lemmatisation, UPOS, MTE XPOS, morphological features, speaker metadata, and ethnographic topic tags.
+Automatic morphosyntactic annotation pipeline for the 115 Torlak audio recordings transcripts. TorlakTag converts raw EXMARaLDA (EXB) transcription files into fully enriched CoNLL-U and TEI XML documents, with lemmatisation, UPOS, MTE XPOS, morphological features, speaker metadata, and ethnographic topic tags.
 
 > **Anonymized supplementary repository.** Author-identifying information has been removed from this release for double-blind review. The citation placeholder below will be completed upon de-anonymization.
 
