@@ -58,7 +58,7 @@ torlak-tag/
 **Requirements:** Python 3.10 or 3.11, CUDA 11.8+ (for GPU inference/training).
 
 ```bash
-git clone https://github.com/SABR007/torlak-tag.git
+git clone https://anonymous.4open.science/r/torlak-tag-6008/
 cd torlak-tag
 pip install -r requirements.txt
 ```
